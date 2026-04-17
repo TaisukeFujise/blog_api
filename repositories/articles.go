@@ -17,7 +17,7 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 		fmt.Println(err)
 		return article, err
 	}
-	_, err = tx.Exec(sqlStr, article.Title, article.Contents, article.UserName, article.NiceNum, article.CreatedAt)
+	result, err := tx.Exec(sqlStr, article.Title, article.Contents, article.UserName)
 	if err != nil {
 		fmt.Println(err)
 		tx.Rollback()
@@ -25,6 +25,12 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 	}
 
 	tx.Commit()
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return article, err
+	}
+	article.ID = int(id)
 	return article, nil
 }
 
@@ -69,6 +75,7 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 		where article_id = ?;
 	`
 	var article models.Article
+	var createdTime sql.NullTime
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -83,7 +90,10 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 		return article, err
 	}
 
-	err = row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &article.CreatedAt)
+	err = row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &createdTime)
+	if createdTime.Valid {
+		article.CreatedAt = createdTime.Time
+	}
 	if err != nil {
 		fmt.Println(err)
 		tx.Rollback()
