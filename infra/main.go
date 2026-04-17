@@ -57,6 +57,7 @@ func main() {
 	// }
 	// defer rows.Close()
 
+	//
 	// articleArray := make([]models.Article, 0)
 	// for rows.Next() {
 	// 	var article models.Article
@@ -90,7 +91,7 @@ func main() {
 	`
 
 	row := tx.QueryRow(sqlGetNice, article_id)
-	if err != nil {
+	if err := row.Err(); err != nil {
 		fmt.Println(err)
 		tx.Rollback()
 		return
