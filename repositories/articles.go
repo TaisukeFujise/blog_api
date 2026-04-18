@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/TaisukeFujise/blog_api/infra/models"
+	"github.com/TaisukeFujise/blog_api/models"
 )
 
 func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {

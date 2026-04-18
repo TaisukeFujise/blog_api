@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/TaisukeFujise/blog_api/infra/models"
+	"github.com/TaisukeFujise/blog_api/models"
 )
 
 func InsertComment(db *sql.DB, comment models.Comment) (models.Comment, error) {

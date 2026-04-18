@@ -3,7 +3,7 @@ package repositories_test
 import (
 	"testing"
 
-	"github.com/TaisukeFujise/blog_api/infra/models"
+	"github.com/TaisukeFujise/blog_api/models"
 	"github.com/TaisukeFujise/blog_api/repositories"
 )
 

@@ -1,6 +1,6 @@
 package testdata
 
-import "github.com/TaisukeFujise/blog_api/infra/models"
+import "github.com/TaisukeFujise/blog_api/models"
 
 var ArticleTestData = []models.Article{
 	models.Article{
