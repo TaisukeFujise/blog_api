@@ -7,9 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/TaisukeFujise/blog_api/controllers"
-	"github.com/TaisukeFujise/blog_api/routers"
-	"github.com/TaisukeFujise/blog_api/services"
+	"github.com/TaisukeFujise/blog_api/api"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -21,14 +19,14 @@ var (
 )
 
 func main() {
+	// db接続情報（ポート番号・アドレスなど）によるsql.DB型の生成
 	db, err := sql.Open("mysql", dbConn)
 	if err != nil {
 		log.Println("fail to connect DB")
 		return
 	}
-	ser := services.NewMyAppService(db)
-	con := controllers.NewMyAppController(ser)
-	r := routers.NewRouter(con)
+
+	r := api.NewRouter(db)
 	log.Println("server start at port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
