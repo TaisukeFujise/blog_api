@@ -19,7 +19,6 @@ var (
 )
 
 func main() {
-	// db接続情報（ポート番号・アドレスなど）によるsql.DB型の生成
 	db, err := sql.Open("mysql", dbConn)
 	if err != nil {
 		log.Println("fail to connect DB")
