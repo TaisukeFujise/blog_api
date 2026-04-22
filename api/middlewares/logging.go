@@ -10,12 +10,19 @@ import (
 
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		// リクエスト情報をロギング
-		log.Println(req.RequestURI, req.Method)
+		traceID := newTraceID()
 
+		// リクエスト情報をロギング
+		// log.Println(req.RequestURI, req.Method)
+		log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
+
+		ctx := req.Context()
+		ctx = SetTraceID(ctx, traceID)
+		req = req.WithContext(ctx) // WithContextメソッドで、新しいコンテキストをreqに登録
 		rlw := NewResLoggingWriter(w)
 		next.ServeHTTP(rlw, req)
-		log.Println(rlw.code)
+		// log.Println(rlw.code)
+		log.Printf("[%d]res: %d", traceID, rlw.code)
 	})
 }
 
