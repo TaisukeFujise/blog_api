@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/TaisukeFujise/blog_api/models"
 )
@@ -14,12 +13,10 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 
 	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(err)
 		return article, err
 	}
 	result, err := tx.Exec(sqlStr, article.Title, article.Contents, article.UserName)
 	if err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return article, err
 	}
@@ -43,12 +40,10 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 
 	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	rows, err := tx.Query(sqlStr, 5, (page-1)*5)
 	if err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return nil, err
 	}
@@ -58,7 +53,6 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 
 		err := rows.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum)
 		if err != nil {
-			fmt.Println(err)
 		} else {
 			articleArray = append(articleArray, article)
 		}
@@ -79,13 +73,11 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 
 	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(err)
 		return article, err
 	}
 
 	row := tx.QueryRow(sqlStr, articleID)
 	if err := row.Err(); err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return article, err
 	}
@@ -95,7 +87,6 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 		article.CreatedAt = createdTime.Time
 	}
 	if err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return article, err
 	}
@@ -114,27 +105,23 @@ func UpdateNiceNum(db *sql.DB, articleID int) error {
 
 	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
 	row := tx.QueryRow(sqlGetNice, articleID)
 	if err := row.Err(); err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return err
 	}
 	var nicenum int
 	err = row.Scan(&nicenum)
 	if err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return err
 	}
 
 	_, err = tx.Exec(sqlUpdateNice, nicenum+1, articleID)
 	if err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return err
 	}

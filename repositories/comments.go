@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/TaisukeFujise/blog_api/models"
 )
@@ -15,13 +14,11 @@ func InsertComment(db *sql.DB, comment models.Comment) (models.Comment, error) {
 
 	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(err)
 		return comment, err
 	}
 
 	_, err = tx.Exec(sqlStr, comment.ArticleID, comment.Message)
 	if err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return comment, err
 	}
@@ -40,13 +37,11 @@ func SelectCommentList(db *sql.DB, articleID int) ([]models.Comment, error) {
 
 	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(err)
 		return commentArray, err
 	}
 
 	rows, err := tx.Query(sqlStr, articleID)
 	if err != nil {
-		fmt.Println(err)
 		tx.Rollback()
 		return commentArray, err
 	}
@@ -57,7 +52,6 @@ func SelectCommentList(db *sql.DB, articleID int) ([]models.Comment, error) {
 
 		err := rows.Scan(&comment.CommentID, &comment.ArticleID, &comment.Message, &createdTime)
 		if err != nil {
-			fmt.Println(err)
 		} else {
 			if createdTime.Valid {
 				comment.CreatedAt = createdTime.Time
