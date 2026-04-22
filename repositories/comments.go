@@ -1,23 +1,24 @@
 package repositories
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/TaisukeFujise/blog_api/models"
 )
 
-func InsertComment(db *sql.DB, comment models.Comment) (models.Comment, error) {
+func InsertComment(ctx context.Context, db *sql.DB, comment models.Comment) (models.Comment, error) {
 	const sqlStr = `
 		insert into comments (article_id, message, created_at) values
 		(?, ?, now());
 	`
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return comment, err
 	}
 
-	_, err = tx.Exec(sqlStr, comment.ArticleID, comment.Message)
+	_, err = tx.ExecContext(ctx, sqlStr, comment.ArticleID, comment.Message)
 	if err != nil {
 		tx.Rollback()
 		return comment, err
@@ -27,7 +28,7 @@ func InsertComment(db *sql.DB, comment models.Comment) (models.Comment, error) {
 	return comment, nil
 }
 
-func SelectCommentList(db *sql.DB, articleID int) ([]models.Comment, error) {
+func SelectCommentList(ctx context.Context, db *sql.DB, articleID int) ([]models.Comment, error) {
 	const sqlStr = `
 		select *
 		from comments
@@ -35,12 +36,12 @@ func SelectCommentList(db *sql.DB, articleID int) ([]models.Comment, error) {
 	`
 	commentArray := make([]models.Comment, 0)
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return commentArray, err
 	}
 
-	rows, err := tx.Query(sqlStr, articleID)
+	rows, err := tx.QueryContext(ctx, sqlStr, articleID)
 	if err != nil {
 		tx.Rollback()
 		return commentArray, err

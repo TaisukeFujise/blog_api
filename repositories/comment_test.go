@@ -9,7 +9,9 @@ import (
 
 func TestSelectCommentList(t *testing.T) {
 	expectedNum := 2
-	got, err := repositories.SelectCommentList(testDB, 1)
+
+	ctx := t.Context()
+	got, err := repositories.SelectCommentList(ctx, testDB, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,9 +27,10 @@ func TestInsertComment(t *testing.T) {
 		ArticleID: 1,
 		Message:   "additional comment",
 	}
-
 	expectedCommentNum := 3
-	newComment, err := repositories.InsertComment(testDB, comment)
+
+	ctx := t.Context()
+	newComment, err := repositories.InsertComment(ctx, testDB, comment)
 	if err != nil {
 		t.Fatal(err)
 	}

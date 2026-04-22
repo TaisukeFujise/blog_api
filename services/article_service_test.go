@@ -31,9 +31,10 @@ func TestMain(m *testing.M) {
 func BenchmarkGetArticleService(b *testing.B) {
 	articleID := 1
 
+	ctx := b.Context()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := aSer.GetArticleService(articleID)
+		_, err := aSer.GetArticleService(ctx, articleID)
 		if err != nil {
 			b.Error(err)
 			break

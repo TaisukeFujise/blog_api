@@ -27,7 +27,7 @@ func (c *CommentController) PostCommentHandler(w http.ResponseWriter, req *http.
 		return
 	}
 
-	comment, err := c.service.PostCommentService(reqComment)
+	comment, err := c.service.PostCommentService(req.Context(), reqComment)
 	if err != nil {
 		apperrors.ErrorHandler(w, req, err)
 		return

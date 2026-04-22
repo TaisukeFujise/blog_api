@@ -33,7 +33,7 @@ func (c *ArticleController) PostArticleHandler(w http.ResponseWriter, req *http.
 		return
 	}
 
-	article, err := c.service.PostArticleService(reqArticle)
+	article, err := c.service.PostArticleService(req.Context(), reqArticle)
 	if err != nil {
 		apperrors.ErrorHandler(w, req, err)
 		return
@@ -58,7 +58,7 @@ func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.
 		page = 1
 	}
 
-	articleList, err := c.service.GetArticleListService(page)
+	articleList, err := c.service.GetArticleListService(req.Context(), page)
 	if err != nil {
 		apperrors.ErrorHandler(w, req, err)
 		return
@@ -75,7 +75,7 @@ func (c *ArticleController) ArticleDetailHandler(w http.ResponseWriter, req *htt
 		return
 	}
 
-	article, err := c.service.GetArticleService(articleID)
+	article, err := c.service.GetArticleService(req.Context(), articleID)
 	if err != nil {
 		apperrors.ErrorHandler(w, req, err)
 		return
@@ -92,7 +92,7 @@ func (c *ArticleController) PostNiceHandler(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	article, err := c.service.PostNiceService(reqArticle)
+	article, err := c.service.PostNiceService(req.Context(), reqArticle)
 	if err != nil {
 		apperrors.ErrorHandler(w, req, err)
 		return

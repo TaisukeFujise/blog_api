@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/TaisukeFujise/blog_api/repositories"
 )
 
-func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) {
+func (s *MyAppService) GetArticleService(ctx context.Context, articleID int) (models.Article, error) {
 	var article models.Article
 	var commentList []models.Comment
 	var articleGetErr, commentGetErr error
@@ -21,7 +22,7 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 	articleChan := make(chan articleResult)
 	defer close(articleChan)
 	go func(ch chan<- articleResult, db *sql.DB, articleID int) {
-		article, err := repositories.SelectArticleDetail(db, articleID)
+		article, err := repositories.SelectArticleDetail(ctx, db, articleID)
 		ch <- articleResult{article: article, err: err}
 	}(articleChan, s.db, articleID)
 
@@ -32,7 +33,7 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 	commentChan := make(chan commentResult)
 	defer close(commentChan)
 	go func(ch chan<- commentResult, db *sql.DB, articleID int) {
-		commentList, err := repositories.SelectCommentList(db, articleID)
+		commentList, err := repositories.SelectCommentList(ctx, db, articleID)
 		ch <- commentResult{commentList: &commentList, err: err}
 	}(commentChan, s.db, articleID)
 
@@ -42,6 +43,8 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 			article, articleGetErr = ar.article, ar.err
 		case cr := <-commentChan:
 			commentList, commentGetErr = *cr.commentList, cr.err
+		case <-ctx.Done():
+			return models.Article{}, ctx.Err()
 		}
 	}
 
@@ -62,8 +65,8 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 	return article, nil
 }
 
-func (s *MyAppService) PostArticleService(article models.Article) (models.Article, error) {
-	newArticle, err := repositories.InsertArticle(s.db, article)
+func (s *MyAppService) PostArticleService(ctx context.Context, article models.Article) (models.Article, error) {
+	newArticle, err := repositories.InsertArticle(ctx, s.db, article)
 	if err != nil {
 		err = apperrors.InsertDataFailed.Wrap(err, "fail to record data")
 		return models.Article{}, err
@@ -71,8 +74,8 @@ func (s *MyAppService) PostArticleService(article models.Article) (models.Articl
 	return newArticle, nil
 }
 
-func (s *MyAppService) GetArticleListService(page int) ([]models.Article, error) {
-	articleList, err := repositories.SelectArticleList(s.db, page)
+func (s *MyAppService) GetArticleListService(ctx context.Context, page int) ([]models.Article, error) {
+	articleList, err := repositories.SelectArticleList(ctx, s.db, page)
 	if err != nil {
 		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
 		return []models.Article{}, err
@@ -85,8 +88,8 @@ func (s *MyAppService) GetArticleListService(page int) ([]models.Article, error)
 	return articleList, nil
 }
 
-func (s *MyAppService) PostNiceService(article models.Article) (models.Article, error) {
-	err := repositories.UpdateNiceNum(s.db, article.ID)
+func (s *MyAppService) PostNiceService(ctx context.Context, article models.Article) (models.Article, error) {
+	err := repositories.UpdateNiceNum(ctx, s.db, article.ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			err = apperrors.NoTargetData.Wrap(err, "does not exist target article")

@@ -1,21 +1,22 @@
 package repositories
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/TaisukeFujise/blog_api/models"
 )
 
-func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
+func InsertArticle(ctx context.Context, db *sql.DB, article models.Article) (models.Article, error) {
 	const sqlStr = `
 		insert into articles (title, contents, username, nice, created_at) values (?, ?, ?, 0, now());
 	`
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return article, err
 	}
-	result, err := tx.Exec(sqlStr, article.Title, article.Contents, article.UserName)
+	result, err := tx.ExecContext(ctx, sqlStr, article.Title, article.Contents, article.UserName)
 	if err != nil {
 		tx.Rollback()
 		return article, err
@@ -31,18 +32,18 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 	return article, nil
 }
 
-func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
+func SelectArticleList(ctx context.Context, db *sql.DB, page int) ([]models.Article, error) {
 	const sqlStr = `
 		select article_id, title, contents, username, nice
 		from articles
 		limit ? offset ?;
 	`
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := tx.Query(sqlStr, 5, (page-1)*5)
+	rows, err := tx.QueryContext(ctx, sqlStr, 5, (page-1)*5)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -62,7 +63,7 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 	return articleArray, nil
 }
 
-func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
+func SelectArticleDetail(ctx context.Context, db *sql.DB, articleID int) (models.Article, error) {
 	const sqlStr = `
 		select *
 		from articles
@@ -71,12 +72,12 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 	var article models.Article
 	var createdTime sql.NullTime
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return article, err
 	}
 
-	row := tx.QueryRow(sqlStr, articleID)
+	row := tx.QueryRowContext(ctx, sqlStr, articleID)
 	if err := row.Err(); err != nil {
 		tx.Rollback()
 		return article, err
@@ -95,15 +96,15 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 	return article, nil
 }
 
-func UpdateNiceNum(db *sql.DB, articleID int) error {
+func UpdateNiceNum(ctx context.Context, db *sql.DB, articleID int) error {
 	const sqlUpdateNice = `update articles set nice = nice + 1 where article_id = ?`
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.Exec(sqlUpdateNice, articleID)
+	_, err = tx.ExecContext(ctx, sqlUpdateNice, articleID)
 	if err != nil {
 		tx.Rollback()
 		return err
