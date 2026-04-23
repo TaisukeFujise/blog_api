@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"strings"
 
 	"cloud.google.com/go/auth/credentials/idtoken"
@@ -13,9 +14,7 @@ import (
 
 type userNameKey struct{}
 
-const (
-	googleClientID = "390957602026-e7nhsbm36gpjsv92f8nrd4c2mf1847k7.apps.googleusercontent.com"
-)
+var googleClientID = os.Getenv("GOOGLE_CLIENT_ID")
 
 // コンテキストからnameフィールドの値を取り出す関数
 // func GetUserName(ctx context.Context) string {
