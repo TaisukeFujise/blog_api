@@ -15,8 +15,20 @@ var (
 	dbUser     = os.Getenv("DB_USER")
 	dbPassword = os.Getenv("DB_PASSWORD")
 	dbDatabase = os.Getenv("DB_NAME")
-	dbConn     = fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+	dbSocket   = os.Getenv("DB_SOCKET")
+	dbConn     string
+	// dbConn = fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
 )
+
+func init() {
+	if dbSocket != "" {
+		// Cloud Run上（Unixソケット接続）
+		dbConn = fmt.Sprintf("%s:%s@unix(%s)/%s?parseTime=true", dbUser, dbPassword, dbSocket, dbDatabase)
+	} else {
+		// ローカル（TCP接続）
+		dbConn = fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+	}
+}
 
 func main() {
 	db, err := sql.Open("mysql", dbConn)
