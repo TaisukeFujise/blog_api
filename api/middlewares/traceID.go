@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"context"
 	"sync"
 )
 
@@ -10,7 +9,7 @@ var (
 	mu    sync.Mutex
 )
 
-type traceIDKey struct{}
+// type traceIDKey struct{}
 
 func newTraceID() int {
 	var no int
@@ -23,15 +22,15 @@ func newTraceID() int {
 	return no
 }
 
-func SetTraceID(ctx context.Context, traceID int) context.Context {
-	return context.WithValue(ctx, traceIDKey{}, traceID) // WithValue(ctx, key, value)
-}
+// func SetTraceID(ctx context.Context, traceID int) context.Context {
+// 	return context.WithValue(ctx, traceIDKey{}, traceID) // WithValue(ctx, key, value)
+// }
 
-func GetTraceID(ctx context.Context) int {
-	id := ctx.Value(traceIDKey{}) // ctx.Value(key)
+// func GetTraceID(ctx context.Context) int {
+// 	id := ctx.Value(traceIDKey{}) // ctx.Value(key)
 
-	if idInt, ok := id.(int); ok {
-		return idInt
-	}
-	return 0
-}
+// 	if idInt, ok := id.(int); ok {
+// 		return idInt
+// 	}
+// 	return 0
+// }

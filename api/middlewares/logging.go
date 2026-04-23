@@ -3,6 +3,8 @@ package middlewares
 import (
 	"log"
 	"net/http"
+
+	"github.com/TaisukeFujise/blog_api/api/common"
 )
 
 // Goのミドルウェアの形は以下のようにhttp.Handlerを受け取ってhttp.Handlerを返す
@@ -17,7 +19,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
 
 		ctx := req.Context()
-		ctx = SetTraceID(ctx, traceID)
+		ctx = common.SetTraceID(ctx, traceID)
 		req = req.WithContext(ctx) // WithContextメソッドで、新しいコンテキストをreqに登録
 		rlw := NewResLoggingWriter(w)
 		next.ServeHTTP(rlw, req)
