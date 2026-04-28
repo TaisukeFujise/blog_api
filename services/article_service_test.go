@@ -6,14 +6,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/TaisukeFujise/blog_api/repositories"
 	"github.com/TaisukeFujise/blog_api/services"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var aSer *services.MyAppService
+var aSer *services.ArticleService
 
 func TestMain(m *testing.M) {
-	// sql.DB 型を作る
 	dbUser := "docker"
 	dbPassword := "docker"
 	dbDatabase := "sampledb"
@@ -23,8 +23,9 @@ func TestMain(m *testing.M) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	// sql.DB 型
-	aSer = services.NewMyAppService(db)
+	articleRepo := repositories.NewArticleRepository(db)
+	commentRepo := repositories.NewCommentRepository(db)
+	aSer = services.NewArticleService(articleRepo, commentRepo)
 	m.Run()
 }
 

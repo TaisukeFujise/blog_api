@@ -13,8 +13,9 @@ import (
 func TestSelectArticleList(t *testing.T) {
 	expectedNum := len(testdata.ArticleTestData)
 
+	repo := repositories.NewArticleRepository(testDB)
 	ctx := t.Context()
-	got, err := repositories.SelectArticleList(ctx, testDB, 1)
+	got, err := repo.SelectArticleList(ctx, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,10 +39,11 @@ func TestSelectArticleDetail(t *testing.T) {
 		},
 	}
 
+	repo := repositories.NewArticleRepository(testDB)
 	ctx := t.Context()
 	for _, test := range tests {
 		t.Run(test.testTitle, func(t *testing.T) {
-			got, err := repositories.SelectArticleDetail(ctx, testDB, test.expected.ID)
+			got, err := repo.SelectArticleDetail(ctx, test.expected.ID)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -73,8 +75,9 @@ func TestInsertArticle(t *testing.T) {
 	}
 	expectedArticleNum := 3
 
+	repo := repositories.NewArticleRepository(testDB)
 	ctx := t.Context()
-	newArticle, err := repositories.InsertArticle(ctx, testDB, article)
+	newArticle, err := repo.InsertArticle(ctx, article)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,22 +96,20 @@ func TestInsertArticle(t *testing.T) {
 
 func TestUpdateNiceNum(t *testing.T) {
 	articleID := 1
+	repo := repositories.NewArticleRepository(testDB)
 	ctx := t.Context()
 
-	before, err := repositories.SelectArticleDetail(ctx, testDB, articleID)
+	before, err := repo.SelectArticleDetail(ctx, articleID)
 	if err != nil {
 		t.Fatal("fail to get before data")
 	}
 
-	err = repositories.UpdateNiceNum(ctx, testDB, articleID)
+	err = repo.UpdateNiceNum(ctx, articleID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	after, err := repositories.SelectArticleDetail(ctx, testDB, articleID)
-	if err != nil {
-		t.Fatal("fail to get after data")
-	}
+	after, err := repo.SelectArticleDetail(ctx, articleID)
 	if err != nil {
 		t.Fatal("fail to get after data")
 	}
