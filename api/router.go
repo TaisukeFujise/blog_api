@@ -6,6 +6,7 @@ import (
 
 	"github.com/TaisukeFujise/blog_api/api/middlewares"
 	"github.com/TaisukeFujise/blog_api/controllers"
+	"github.com/TaisukeFujise/blog_api/repositories"
 	"github.com/TaisukeFujise/blog_api/services"
 	"github.com/gorilla/mux"
 )
@@ -16,9 +17,12 @@ import (
 - Routerの登録
 */
 func NewRouter(db *sql.DB) *mux.Router {
-	ser := services.NewMyAppService(db)
-	aCon := controllers.NewArticleController(ser)
-	cCon := controllers.NewCommentController(ser)
+	articleRepo := repositories.NewArticleRepository(db)
+	commentRepo := repositories.NewCommentRepository(db)
+	aSer := services.NewArticleService(articleRepo, commentRepo)
+	cSer := services.NewCommentService(commentRepo)
+	aCon := controllers.NewArticleController(aSer)
+	cCon := controllers.NewCommentController(cSer)
 
 	r := mux.NewRouter()
 

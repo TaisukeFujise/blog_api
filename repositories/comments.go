@@ -7,13 +7,21 @@ import (
 	"github.com/TaisukeFujise/blog_api/models"
 )
 
-func InsertComment(ctx context.Context, db *sql.DB, comment models.Comment) (models.Comment, error) {
+type CommentRepositoryImpl struct {
+	db *sql.DB
+}
+
+func NewCommentRepository(db *sql.DB) *CommentRepositoryImpl {
+	return &CommentRepositoryImpl{db: db}
+}
+
+func (r *CommentRepositoryImpl) InsertComment(ctx context.Context, comment models.Comment) (models.Comment, error) {
 	const sqlStr = `
 		insert into comments (article_id, message, created_at) values
 		(?, ?, now());
 	`
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return comment, err
 	}
@@ -28,7 +36,7 @@ func InsertComment(ctx context.Context, db *sql.DB, comment models.Comment) (mod
 	return comment, nil
 }
 
-func SelectCommentList(ctx context.Context, db *sql.DB, articleID int) ([]models.Comment, error) {
+func (r *CommentRepositoryImpl) SelectCommentList(ctx context.Context, articleID int) ([]models.Comment, error) {
 	const sqlStr = `
 		select *
 		from comments
@@ -36,7 +44,7 @@ func SelectCommentList(ctx context.Context, db *sql.DB, articleID int) ([]models
 	`
 	commentArray := make([]models.Comment, 0)
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return commentArray, err
 	}

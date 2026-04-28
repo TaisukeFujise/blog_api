@@ -7,12 +7,20 @@ import (
 	"github.com/TaisukeFujise/blog_api/models"
 )
 
-func InsertArticle(ctx context.Context, db *sql.DB, article models.Article) (models.Article, error) {
+type ArticleRepositoryImpl struct {
+	db *sql.DB
+}
+
+func NewArticleRepository(db *sql.DB) *ArticleRepositoryImpl {
+	return &ArticleRepositoryImpl{db: db}
+}
+
+func (r *ArticleRepositoryImpl) InsertArticle(ctx context.Context, article models.Article) (models.Article, error) {
 	const sqlStr = `
 		insert into articles (title, contents, username, nice, created_at) values (?, ?, ?, 0, now());
 	`
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return article, err
 	}
@@ -32,14 +40,14 @@ func InsertArticle(ctx context.Context, db *sql.DB, article models.Article) (mod
 	return article, nil
 }
 
-func SelectArticleList(ctx context.Context, db *sql.DB, page int) ([]models.Article, error) {
+func (r *ArticleRepositoryImpl) SelectArticleList(ctx context.Context, page int) ([]models.Article, error) {
 	const sqlStr = `
 		select article_id, title, contents, username, nice
 		from articles
 		limit ? offset ?;
 	`
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +71,7 @@ func SelectArticleList(ctx context.Context, db *sql.DB, page int) ([]models.Arti
 	return articleArray, nil
 }
 
-func SelectArticleDetail(ctx context.Context, db *sql.DB, articleID int) (models.Article, error) {
+func (r *ArticleRepositoryImpl) SelectArticleDetail(ctx context.Context, articleID int) (models.Article, error) {
 	const sqlStr = `
 		select *
 		from articles
@@ -72,7 +80,7 @@ func SelectArticleDetail(ctx context.Context, db *sql.DB, articleID int) (models
 	var article models.Article
 	var createdTime sql.NullTime
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return article, err
 	}
@@ -96,10 +104,10 @@ func SelectArticleDetail(ctx context.Context, db *sql.DB, articleID int) (models
 	return article, nil
 }
 
-func UpdateNiceNum(ctx context.Context, db *sql.DB, articleID int) error {
+func (r *ArticleRepositoryImpl) UpdateNiceNum(ctx context.Context, articleID int) error {
 	const sqlUpdateNice = `update articles set nice = nice + 1 where article_id = ?`
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
