@@ -32,5 +32,6 @@ func (c *CommentController) PostCommentHandler(w http.ResponseWriter, req *http.
 		apperrors.ErrorHandler(w, req, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comment)
 }

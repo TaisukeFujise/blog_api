@@ -23,6 +23,7 @@ func NewArticleController(s services.ArticleServicer) *ArticleController {
 }
 
 func (c *ArticleController) HelloHandler(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	io.WriteString(w, "Hello world\n")
 }
 
@@ -48,6 +49,7 @@ func (c *ArticleController) PostArticleHandler(w http.ResponseWriter, req *http.
 		apperrors.ErrorHandler(w, req, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(article)
 }
 
@@ -73,6 +75,7 @@ func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.
 		apperrors.ErrorHandler(w, req, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(articleList)
 }
 
@@ -90,6 +93,7 @@ func (c *ArticleController) ArticleDetailHandler(w http.ResponseWriter, req *htt
 		apperrors.ErrorHandler(w, req, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(article)
 }
 
@@ -107,5 +111,6 @@ func (c *ArticleController) PostNiceHandler(w http.ResponseWriter, req *http.Req
 		apperrors.ErrorHandler(w, req, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(article)
 }
