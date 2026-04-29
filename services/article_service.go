@@ -2,11 +2,11 @@ package services
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
 	"github.com/TaisukeFujise/blog_api/apperrors"
 	"github.com/TaisukeFujise/blog_api/models"
+	"github.com/TaisukeFujise/blog_api/services/repositories"
 )
 
 func (s *ArticleService) GetArticleService(ctx context.Context, articleID int) (models.Article, error) {
@@ -48,7 +48,7 @@ func (s *ArticleService) GetArticleService(ctx context.Context, articleID int) (
 	}
 
 	if articleGetErr != nil {
-		if errors.Is(articleGetErr, sql.ErrNoRows) {
+		if errors.Is(articleGetErr, repositories.ErrNotFound) {
 			err := apperrors.NAData.Wrap(articleGetErr, "no data")
 			return models.Article{}, err
 		}
@@ -90,7 +90,7 @@ func (s *ArticleService) GetArticleListService(ctx context.Context, page int) ([
 func (s *ArticleService) PostNiceService(ctx context.Context, article models.Article) (models.Article, error) {
 	err := s.articleRepo.UpdateNiceNum(ctx, article.ID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, repositories.ErrNotFound) {
 			err = apperrors.NoTargetData.Wrap(err, "does not exist target article")
 			return models.Article{}, err
 		}

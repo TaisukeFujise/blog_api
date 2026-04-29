@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/TaisukeFujise/blog_api/models"
 )
@@ -17,3 +18,5 @@ type CommentRepository interface {
 	InsertComment(ctx context.Context, comment models.Comment) (models.Comment, error)
 	SelectCommentList(ctx context.Context, articleID int) ([]models.Comment, error)
 }
+
+var ErrNotFound = errors.New("record not found")

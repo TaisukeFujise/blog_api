@@ -3,8 +3,10 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/TaisukeFujise/blog_api/models"
+	"github.com/TaisukeFujise/blog_api/services/repositories"
 )
 
 type ArticleRepositoryImpl struct {
@@ -99,6 +101,9 @@ func (r *ArticleRepositoryImpl) SelectArticleDetail(ctx context.Context, article
 	}
 	if err != nil {
 		tx.Rollback()
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Article{}, repositories.ErrNotFound
+		}
 		return models.Article{}, err
 	}
 
@@ -114,12 +119,20 @@ func (r *ArticleRepositoryImpl) UpdateNiceNum(ctx context.Context, articleID int
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, sqlUpdateNice, articleID)
+	result, err := tx.ExecContext(ctx, sqlUpdateNice, articleID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if rowsAffected == 0 {
+		tx.Rollback()
+		return repositories.ErrNotFound
+	}
 	tx.Commit()
 	return nil
 }
