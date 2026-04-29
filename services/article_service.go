@@ -77,7 +77,7 @@ func (s *ArticleService) GetArticleListService(ctx context.Context, page int) ([
 	articleList, err := s.articleRepo.SelectArticleList(ctx, page)
 	if err != nil {
 		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
-		return []models.Article{}, err
+		return nil, err
 	}
 
 	if len(articleList) == 0 {

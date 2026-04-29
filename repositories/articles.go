@@ -22,19 +22,19 @@ func (r *ArticleRepositoryImpl) InsertArticle(ctx context.Context, article model
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return article, err
+		return models.Article{}, err
 	}
 	result, err := tx.ExecContext(ctx, sqlStr, article.Title, article.Contents, article.UserName)
 	if err != nil {
 		tx.Rollback()
-		return article, err
+		return models.Article{}, err
 	}
 
 	tx.Commit()
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return article, err
+		return models.Article{}, err
 	}
 	article.ID = int(id)
 	return article, nil
@@ -62,6 +62,8 @@ func (r *ArticleRepositoryImpl) SelectArticleList(ctx context.Context, page int)
 
 		err := rows.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum)
 		if err != nil {
+			tx.Rollback()
+			return nil, err
 		} else {
 			articleArray = append(articleArray, article)
 		}
@@ -82,13 +84,13 @@ func (r *ArticleRepositoryImpl) SelectArticleDetail(ctx context.Context, article
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return article, err
+		return models.Article{}, err
 	}
 
 	row := tx.QueryRowContext(ctx, sqlStr, articleID)
 	if err := row.Err(); err != nil {
 		tx.Rollback()
-		return article, err
+		return models.Article{}, err
 	}
 
 	err = row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &createdTime)
@@ -97,7 +99,7 @@ func (r *ArticleRepositoryImpl) SelectArticleDetail(ctx context.Context, article
 	}
 	if err != nil {
 		tx.Rollback()
-		return article, err
+		return models.Article{}, err
 	}
 
 	tx.Commit()

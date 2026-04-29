@@ -23,13 +23,13 @@ func (r *CommentRepositoryImpl) InsertComment(ctx context.Context, comment model
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return comment, err
+		return models.Comment{}, err
 	}
 
 	_, err = tx.ExecContext(ctx, sqlStr, comment.ArticleID, comment.Message)
 	if err != nil {
 		tx.Rollback()
-		return comment, err
+		return models.Comment{}, err
 	}
 
 	tx.Commit()
@@ -46,13 +46,13 @@ func (r *CommentRepositoryImpl) SelectCommentList(ctx context.Context, articleID
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return commentArray, err
+		return nil, err
 	}
 
 	rows, err := tx.QueryContext(ctx, sqlStr, articleID)
 	if err != nil {
 		tx.Rollback()
-		return commentArray, err
+		return nil, err
 	}
 
 	for rows.Next() {
@@ -61,6 +61,8 @@ func (r *CommentRepositoryImpl) SelectCommentList(ctx context.Context, articleID
 
 		err := rows.Scan(&comment.CommentID, &comment.ArticleID, &comment.Message, &createdTime)
 		if err != nil {
+			tx.Rollback()
+			return nil, err
 		} else {
 			if createdTime.Valid {
 				comment.CreatedAt = createdTime.Time
